@@ -59,6 +59,9 @@ namespace UI
                 if (UIManager.CurrentMenu == null || !(UIManager.CurrentMenu is InGameMenu))
                     return;
                 var manager = (InGameManager)SceneLoader.CurrentGameManager;
+                if (ChatManager.IsChatActive())
+                    SetPointer();
+                    return;
                 if (InGameMenu.InMenu() || !manager.IsFinishedLoading() || manager.GlobalPause || manager.Restarting)
                     SetPointer();
                 else if (manager.CurrentCharacter != null && (manager.CurrentCharacter is Human || manager.CurrentCharacter is BasicTitan) && !manager.CurrentCharacter.Dead && !CustomLogicManager.Cutscene)

@@ -2,6 +2,7 @@
 using UnityEngine;
 using UnityEngine.Events;
 using UnityEngine.UI;
+using UnityEngine.EventSystems;
 using Settings;
 using GameManagers;
 
@@ -15,7 +16,7 @@ namespace UI
         protected override string ThemePanel => "ChatPanel";
         protected Transform _caret;
         public bool IgnoreNextActivation;
-
+        
         public override void Setup(BasePanel parent = null)
         {
             _inputField = transform.Find("InputField").GetComponent<InputField>();
@@ -47,6 +48,16 @@ namespace UI
         {
             _inputField.Select();
             _inputField.ActivateInputField();
+            CursorManager.SetPointer(true);
+        }
+
+        public void Deactivate()
+        {
+            if (IsPointerOverChatUI())
+                return;
+
+            _inputField.DeactivateInputField();
+            CursorManager.SetHidden(true); 
         }
 
         public bool IsInputActive()
@@ -122,6 +133,30 @@ namespace UI
                         _caret.gameObject.AddComponent<Image>();
                 }
             }
+            if (Input.GetMouseButtonDown(0) && IsPointerOverChatUI())
+            {
+                Activate();
+            }
+        }
+
+        private bool IsPointerOverChatUI()
+        {
+            if (EventSystem.current.IsPointerOverGameObject())
+            {
+                PointerEventData pointerEventData = new PointerEventData(EventSystem.current)
+                {
+                    position = Input.mousePosition
+                };
+                List<RaycastResult> raycastResults = new List<RaycastResult>();
+                EventSystem.current.RaycastAll(pointerEventData, raycastResults);
+
+                foreach (var result in raycastResults)
+                {
+                    if (result.gameObject.transform.IsChildOf(_panel.transform))
+                        return true;
+                }
+            }
+            return false;
         }
 
         protected GameObject CreateLine(string text)
